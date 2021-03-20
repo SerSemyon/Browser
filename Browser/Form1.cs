@@ -266,8 +266,23 @@ namespace Browser
 
         private void addBookmarkButton_Click(object sender, EventArgs e)
         {
-            if (tabControl1.SelectedTab.Text != "" && tabControl1.SelectedTab.Text !="Закладки")
-            bookmarks.Add(new bookmark(tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString()));
+            string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+            if (tabControl1.SelectedTab.Text != "" && tabControl1.SelectedTab.Text !="Закладки" && tabControl1.SelectedTab.Text != "История")
+            {
+                bool haveBookmark = false;
+                foreach (bookmark mark in bookmarks)
+                {
+                    if (mark.url == newUrl)
+                    {
+                        haveBookmark = true;
+                        break;
+                    }
+                }
+                if (!haveBookmark)
+                {
+                    bookmarks.Add(new bookmark(tabControl1.SelectedTab.Text, newUrl));
+                }
+            }
         }
 
         private void richTextBox1_Enter(object sender, EventArgs e)
@@ -290,6 +305,11 @@ namespace Browser
         {
             CreateHtmlHistory();
             AddHtmlTab("lastHistory.html");
+        }
+
+        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 

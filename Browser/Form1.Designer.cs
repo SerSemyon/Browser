@@ -33,7 +33,7 @@ namespace Browser
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.button8 = new System.Windows.Forms.Button();
+            this.historyButton = new System.Windows.Forms.Button();
             this.bookmarksButton = new System.Windows.Forms.Button();
             this.addBookmarkButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
@@ -82,7 +82,7 @@ namespace Browser
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel2.Controls.Add(this.button8, 8, 0);
+            this.tableLayoutPanel2.Controls.Add(this.historyButton, 8, 0);
             this.tableLayoutPanel2.Controls.Add(this.bookmarksButton, 7, 0);
             this.tableLayoutPanel2.Controls.Add(this.addBookmarkButton, 6, 0);
             this.tableLayoutPanel2.Controls.Add(this.deleteButton, 5, 0);
@@ -99,15 +99,16 @@ namespace Browser
             this.tableLayoutPanel2.Size = new System.Drawing.Size(794, 34);
             this.tableLayoutPanel2.TabIndex = 1;
             // 
-            // button8
+            // historyButton
             // 
-            this.button8.BackgroundImage = global::Browser.Properties.Resources.history;
-            this.button8.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button8.Location = new System.Drawing.Point(757, 3);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(34, 28);
-            this.button8.TabIndex = 8;
-            this.button8.UseVisualStyleBackColor = true;
+            this.historyButton.BackgroundImage = global::Browser.Properties.Resources.history;
+            this.historyButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.historyButton.Location = new System.Drawing.Point(757, 3);
+            this.historyButton.Name = "historyButton";
+            this.historyButton.Size = new System.Drawing.Size(34, 28);
+            this.historyButton.TabIndex = 8;
+            this.historyButton.UseVisualStyleBackColor = true;
+            this.historyButton.Click += new System.EventHandler(this.historyButton_Click);
             // 
             // bookmarksButton
             // 
@@ -224,7 +225,7 @@ namespace Browser
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Button refreshButton;
-        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button historyButton;
         private System.Windows.Forms.Button bookmarksButton;
         private System.Windows.Forms.Button addBookmarkButton;
         private System.Windows.Forms.Button deleteButton;

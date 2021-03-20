@@ -16,7 +16,9 @@ namespace Browser
         int i = 0; //индекс вкладки
         bool isPageCompleted = false;
         List<bookmark> bookmarks;
+        List<history> histories;
         FileStream streamHtml;
+        string lastOpenUrl;
         void ReadBookmarks()
         {
             StreamReader reader = new StreamReader("Bookmarks.txt");
@@ -29,6 +31,20 @@ namespace Browser
             }
             reader.Close();
         }
+        void ReadHistory()
+        {
+            StreamReader reader = new StreamReader("History.txt");
+            string fileString = reader.ReadToEnd();
+            string[] fileData = fileString.Split('\n');
+            histories = new List<history>(fileData.Length / 3);
+            for (int i = 0; i < fileData.Length - 3; i += 3)
+            {
+                DateTime timeBrowse = Convert.ToDateTime(fileData[i]);
+                if (timeBrowse.AddDays(7)>=DateTime.Now)
+                histories.Add(new history(timeBrowse, fileData[i+1], fileData[i + 2]));
+            }
+            reader.Close();
+        }
         void SaveBookmarks()
         {
             StreamWriter writer = new StreamWriter("Bookmarks.txt");
@@ -38,11 +54,25 @@ namespace Browser
             }
             writer.Close();
         }
-
+        void SaveHistory()
+        {
+            StreamWriter writer = new StreamWriter("History.txt");
+            foreach (history book in histories)
+            {
+                writer.Write(book.time.ToString() + '\n' + book.name + '\n'+ book.url + '\n');
+            }
+            writer.Close();
+        }
         private void HtmlDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             streamHtml.Close();
             tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;
+            if (((WebBrowser)sender).Url.ToString()!= "about:blank")
+            {
+                ((WebBrowser)sender).DocumentCompleted -= HtmlDocumentCompleted;
+                ((WebBrowser)sender).DocumentCompleted += DocumentCompleted;
+                SaveInHistory();
+            }
         }
         void CreateHtmlBookmarks()
         {
@@ -61,11 +91,29 @@ namespace Browser
             streamwriter.WriteLine("</html>");
             streamwriter.Close();
         }
+        void CreateHtmlHistory()
+        {
+            StreamWriter streamwriter = new StreamWriter("lastHistory.html");
+            streamwriter.WriteLine("<html>");
+            streamwriter.WriteLine("<head>");
+            streamwriter.WriteLine("  <title>История</title>");
+            streamwriter.WriteLine("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
+            streamwriter.WriteLine("</head>");
+            streamwriter.WriteLine("<body>");
+            foreach (history story in histories)
+            {
+                streamwriter.WriteLine("<p><a>" + story.time.ToString()+"</a> <a href=" + story.url + ">" + story.name + " "+ story.url+"</a></p>");
+            }
+            streamwriter.WriteLine("</body>");
+            streamwriter.WriteLine("</html>");
+            streamwriter.Close();
+        }
         public browserForm()
         {
             InitializeComponent();
             AddTab();
             ReadBookmarks();
+            ReadHistory();
         }
         void AddTab()
         {
@@ -84,7 +132,6 @@ namespace Browser
             web.ScriptErrorsSuppressed = true; 
             web.Dock = DockStyle.Fill; 
             web.NewWindow += NewWindow;
-            web.Navigated += SaveInHistory;
             tabControl1.TabPages.Add("New Pages"); 
             tabControl1.SelectTab(i); 
             tabControl1.SelectedTab.Controls.Add(web); 
@@ -95,23 +142,17 @@ namespace Browser
         }
         void AddTab(string url)
         {
-            WebBrowser web = new WebBrowser(); //экземпляр класса web браузер 
-            web.Visible = true; // сделаем его видимым
-            web.ScriptErrorsSuppressed = true; // отображает все ошибки
-            web.Dock = DockStyle.Fill; // сделаем его на полный экран
+            WebBrowser web = new WebBrowser();
+            web.Visible = true; 
+            web.ScriptErrorsSuppressed = true; 
+            web.Dock = DockStyle.Fill;
             web.DocumentCompleted += DocumentCompleted;
             web.NewWindow += NewWindow;
-            web.Navigated += SaveInHistory;
-            tabControl1.TabPages.Add("New Pages"); // добавление влкадок
-            tabControl1.SelectTab(i); // выделяет поределнную вкладку
-            tabControl1.SelectedTab.Controls.Add(web); //то, что данной вкладой управляет
+            tabControl1.TabPages.Add("New Pages"); 
+            tabControl1.SelectTab(i); 
+            tabControl1.SelectedTab.Controls.Add(web);
             i += 1; // вкладка с индексом один
             OpenUrl(url);
-        }
-
-        void SaveInHistory(object sender, WebBrowserNavigatedEventArgs e)
-        {
-
         }
         private void NewWindow(object sender, CancelEventArgs e)
         {
@@ -127,11 +168,31 @@ namespace Browser
             ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Navigate(url);
 
         }
+        void SaveInHistory()
+        {
+            if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
+            {
+                history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString());
+                try
+                {
+                    if (nowOpen.url != lastOpenUrl)
+                    {
+                        histories.Add(nowOpen);
+                    }
+                }
+                catch
+                {
+                    histories.Add(nowOpen);
+                }
+                lastOpenUrl = nowOpen.url;
+            }
+        }
         private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             isPageCompleted = true;
             refreshButton.BackgroundImage = Properties.Resources.refresh; 
-            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;//чтобы показывалось имя веб страницы
+            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;
+            SaveInHistory();
         }
         private void refreshButton_Click(object sender, EventArgs e)
         {
@@ -158,7 +219,8 @@ namespace Browser
                 }
                 else if (tabControl1.SelectedTab.Text == "История")
                 {
-
+                    CreateHtmlHistory();
+                    OpenHtml("lastHistory.html");
                 }
             }
         }
@@ -199,6 +261,7 @@ namespace Browser
         private void browserForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveBookmarks();
+            SaveHistory();
         }
 
         private void addBookmarkButton_Click(object sender, EventArgs e)
@@ -222,6 +285,12 @@ namespace Browser
             CreateHtmlBookmarks();
             AddHtmlTab("lastBookmarks.html");
         }
+
+        private void historyButton_Click(object sender, EventArgs e)
+        {
+            CreateHtmlHistory();
+            AddHtmlTab("lastHistory.html");
+        }
     }
 
     class bookmark
@@ -230,6 +299,18 @@ namespace Browser
         public string url;
         public bookmark(string newName, string newUrl)
         {
+            name = newName;
+            url = newUrl;
+        }
+    }
+    class history
+    {
+        public DateTime time;
+        public string name;
+        public string url;
+        public history(DateTime newTime, string newName, string newUrl)
+        {
+            time = newTime;
             name = newName;
             url = newUrl;
         }

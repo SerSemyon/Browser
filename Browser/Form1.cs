@@ -135,7 +135,7 @@ namespace Browser
             tabControl1.TabPages.Add("New Pages"); 
             tabControl1.SelectTab(i); 
             tabControl1.SelectedTab.Controls.Add(web); 
-            i += 1; // вкладка с индексом один
+            i += 1;
             web.DocumentCompleted += HtmlDocumentCompleted;
             streamHtml = new FileStream(nameFile, FileMode.Open);
             web.DocumentStream = streamHtml;
@@ -151,7 +151,7 @@ namespace Browser
             tabControl1.TabPages.Add("New Pages"); 
             tabControl1.SelectTab(i); 
             tabControl1.SelectedTab.Controls.Add(web);
-            i += 1; // вкладка с индексом один
+            i += 1;
             OpenUrl(url);
         }
         private void NewWindow(object sender, CancelEventArgs e)
@@ -272,7 +272,7 @@ namespace Browser
                 bool haveBookmark = false;
                 foreach (bookmark mark in bookmarks)
                 {
-                    if (mark.url == newUrl)
+                    if (mark.url.Split('/')[2] == newUrl.Split('/')[2])
                     {
                         haveBookmark = true;
                         break;
@@ -305,11 +305,6 @@ namespace Browser
         {
             CreateHtmlHistory();
             AddHtmlTab("lastHistory.html");
-        }
-
-        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 

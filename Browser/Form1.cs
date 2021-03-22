@@ -243,7 +243,14 @@ namespace Browser
 
         private void nextButton_Click(object sender, EventArgs e)
         {
-            ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoForward();
+            try
+            {
+                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoForward();
+            }
+            catch
+            {
+
+            }
         }
 
         private void addButton_Click(object sender, EventArgs e)

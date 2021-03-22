@@ -231,7 +231,14 @@ namespace Browser
 
         private void backButton_Click(object sender, EventArgs e)
         {
-            ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoBack();
+            try
+            {
+                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoBack();
+            }
+            catch
+            {
+
+            }
         }
 
         private void nextButton_Click(object sender, EventArgs e)
@@ -438,7 +445,10 @@ namespace Browser
                 style.Height = 100;
             }
             mainPanel.Visible = true;
-            mainPanel.BackgroundImage = Properties.Resources.bookmarks;
+            if (bookmarks.Count > 0)
+                mainPanel.BackColor = Color.DarkCyan;
+            else 
+                mainPanel.BackgroundImage = Properties.Resources.bookmarks;
             mainPanel.BackgroundImageLayout = ImageLayout.Zoom;
             tabControl1.SelectedTab.Controls.Add(mainPanel);
         }
@@ -474,8 +484,10 @@ namespace Browser
             openUrlButton = new urlButton(mark.url);
             openUrlButton.Visible = true;
             openUrlButton.Text = mark.name;
-            openUrlButton.BackColor = Color.Aqua;
+            openUrlButton.BackColor = Color.White;
             openUrlButton.Dock = DockStyle.Fill;
+            openUrlButton.BackgroundImageLayout = ImageLayout.Zoom;
+            openUrlButton.BackgroundImage = Properties.Resources.tableBookmark;
             deleteButton = new urlButton(mark.url);
             deleteButton.Visible = true;
             deleteButton.Text = "X";

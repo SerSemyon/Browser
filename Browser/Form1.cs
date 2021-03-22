@@ -83,6 +83,13 @@ namespace Browser
             streamwriter.WriteLine("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
             streamwriter.WriteLine("</head>");
             streamwriter.WriteLine("<body>");
+            if (histories.Count == 0)
+            {
+                streamwriter.WriteLine("<p><img src =\"https://cdn.iconscout.com/icon/premium/png-512-thumb/janitor-1631013-1380608.png\" alt=\"Clear\"></p>");
+                streamwriter.WriteLine("<p><a> Тут чисто </a></p>");
+            }
+            else
+                streamwriter.WriteLine("<p><img src =\"http://cdn.onlinewebfonts.com/svg/download_359214.png\" height =50 width = 50 align=\"middle\"></p>");
             foreach (history story in histories)
             {
                 streamwriter.WriteLine("<p><a>" + story.time.ToString()+"</a> <a href=" + story.url + ">" + story.name + " "+ story.url+"</a></p>");
@@ -161,7 +168,8 @@ namespace Browser
         {
             try
             {
-                if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
+                string thisUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                if (thisUrl != "about:blank")
                 {
                     history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString());
                     try
@@ -208,7 +216,7 @@ namespace Browser
                         refreshButton.BackgroundImage = Properties.Resources.refresh;
                     }
                 }
-                else if (tabControl1.SelectedTab.Text == "История")
+                else
                 {
                     CreateHtmlHistory();
                     OpenHtml("lastHistory.html");
@@ -217,6 +225,7 @@ namespace Browser
             catch
             {
                 RefreshBookmarksTab();
+                tabControl1.SelectedTab.Text = "Закладки";
             }
         }
 
@@ -232,7 +241,8 @@ namespace Browser
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            AddTab();
+            if (isPageCompleted)
+                AddTab();
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -357,7 +367,12 @@ namespace Browser
             DialogResult mes = MessageBox.Show("Очистить историю?", "История просмотров будет удалена", MessageBoxButtons.OKCancel);
             if (mes == DialogResult.OK)
             {
-                histories.Clear();
+                histories.Clear(); 
+                if (tabControl1.SelectedTab.Text == "История")
+                {
+                    CreateHtmlHistory();
+                    OpenHtml("lastHistory.html");
+                } 
             }
         }
 
@@ -423,6 +438,8 @@ namespace Browser
                 style.Height = 100;
             }
             mainPanel.Visible = true;
+            mainPanel.BackgroundImage = Properties.Resources.bookmarks;
+            mainPanel.BackgroundImageLayout = ImageLayout.Zoom;
             tabControl1.SelectedTab.Controls.Add(mainPanel);
         }
         void RefreshBookmarksTab()

@@ -115,6 +115,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="global_payment_international_icon_182974.ico" />
+    <None Include="Resources\print.jpg" />
+    <None Include="Resources\clear.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

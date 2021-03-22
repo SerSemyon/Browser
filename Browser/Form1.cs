@@ -74,23 +74,6 @@ namespace Browser
                 SaveInHistory();
             }
         }
-        void CreateHtmlBookmarks()
-        {
-            StreamWriter streamwriter = new StreamWriter("lastBookmarks.html");
-            streamwriter.WriteLine("<html>");
-            streamwriter.WriteLine("<head>");
-            streamwriter.WriteLine("  <title>Закладки</title>");
-            streamwriter.WriteLine("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
-            streamwriter.WriteLine("</head>");
-            streamwriter.WriteLine("<body>");
-            foreach (bookmark mark in bookmarks)
-            {
-                streamwriter.WriteLine("<p><a href="+ mark.url+">"+mark.name+"</a></p>");
-            }
-            streamwriter.WriteLine("</body>");
-            streamwriter.WriteLine("</html>");
-            streamwriter.Close();
-        }
         void CreateHtmlHistory()
         {
             StreamWriter streamwriter = new StreamWriter("lastHistory.html");
@@ -158,70 +141,82 @@ namespace Browser
         {
             HtmlElement link = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Document.ActiveElement;
             string url = link.GetAttribute("href");
-            ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Navigate(url);
+            ((WebBrowser)sender).Navigate(url);
             e.Cancel = true;
         }
         void OpenUrl(string url)
         {
             isPageCompleted = false;
             refreshButton.BackgroundImage = Properties.Resources.stop;
-            ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Navigate(url);
-
+            try
+            {
+                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Navigate(url);
+            }
+            catch
+            {
+                AddTab(url);
+            }
         }
         void SaveInHistory()
         {
-            if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
+            try
             {
-                history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString());
-                try
+                if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
                 {
-                    if (nowOpen.url != lastOpenUrl)
+                    history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString());
+                    try
+                    {
+                        if (nowOpen.url != lastOpenUrl)
+                        {
+                            histories.Add(nowOpen);
+                        }
+                    }
+                    catch
                     {
                         histories.Add(nowOpen);
                     }
+                    lastOpenUrl = nowOpen.url;
                 }
-                catch
-                {
-                    histories.Add(nowOpen);
-                }
-                lastOpenUrl = nowOpen.url;
+            }
+            catch
+            {
+
             }
         }
         private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             isPageCompleted = true;
             refreshButton.BackgroundImage = Properties.Resources.refresh; 
-            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;
+            tabControl1.SelectedTab.Text = ((WebBrowser)sender).DocumentTitle;
             SaveInHistory();
         }
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
+            try
             {
-                if (isPageCompleted)
+                if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
                 {
-                    string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
-                    OpenUrl(newUrl);
-                }
-                else
-                {
-                    ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
-                    isPageCompleted = true;
-                    refreshButton.BackgroundImage = Properties.Resources.refresh;
-                }
-            }
-            else
-            {
-                if (tabControl1.SelectedTab.Text == "Закладки")
-                {
-                    CreateHtmlBookmarks();
-                    OpenHtml("lastBookmarks.html");
+                    if (isPageCompleted)
+                    {
+                        string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                        OpenUrl(newUrl);
+                    }
+                    else
+                    {
+                        ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
+                        isPageCompleted = true;
+                        refreshButton.BackgroundImage = Properties.Resources.refresh;
+                    }
                 }
                 else if (tabControl1.SelectedTab.Text == "История")
                 {
                     CreateHtmlHistory();
                     OpenHtml("lastHistory.html");
                 }
+            }
+            catch
+            {
+                RefreshBookmarksTab();
             }
         }
 
@@ -244,8 +239,16 @@ namespace Browser
         {
             if (tabControl1.TabPages.Count > 1)
             {
-                tabControl1.TabPages.RemoveAt(tabControl1.SelectedIndex);
-                tabControl1.SelectTab(tabControl1.TabPages.Count - 1);
+                int number = tabControl1.SelectedIndex;
+                tabControl1.TabPages.RemoveAt(number);
+                try
+                {
+                    tabControl1.SelectTab(number - 1);
+                }
+                catch
+                {
+                    tabControl1.SelectTab(0);
+                }
                 i -= 1;
             }
         }
@@ -266,28 +269,71 @@ namespace Browser
 
         private void addBookmarkButton_Click(object sender, EventArgs e)
         {
-            string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
-            if (tabControl1.SelectedTab.Text != "" && tabControl1.SelectedTab.Text !="Закладки" && tabControl1.SelectedTab.Text != "История")
+            try
             {
-                bool haveBookmark = false;
-                foreach (bookmark mark in bookmarks)
+                string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                if (tabControl1.SelectedTab.Text != "" && tabControl1.SelectedTab.Text != "Закладки" && tabControl1.SelectedTab.Text != "История")
                 {
-                    if (mark.url.Split('/')[2] == newUrl.Split('/')[2])
+                    bool haveBookmark = false;
+                    foreach (bookmark mark in bookmarks)
                     {
-                        haveBookmark = true;
-                        break;
+                        if (mark.url.Split('/')[2] == "google.com")
+                        {
+                            if (mark.url.Split('/')[2] == newUrl.Split('/')[2])
+                            {
+                                haveBookmark = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (mark.url == newUrl)
+                            {
+                                haveBookmark = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!haveBookmark)
+                    {
+                        bookmarks.Add(new bookmark(tabControl1.SelectedTab.Text, newUrl));
                     }
                 }
-                if (!haveBookmark)
+            }
+            catch
+            {
+
+            }
+        }
+        private void OpenBookmark(object sender, EventArgs e)
+        {
+            AddTab(((urlButton)sender).url);
+        }
+        public void DeleteBookmark(object sender, EventArgs e)
+        {
+            foreach (bookmark mark in bookmarks)
+            {
+                if (mark.url == ((urlButton)sender).url)
                 {
-                    bookmarks.Add(new bookmark(tabControl1.SelectedTab.Text, newUrl));
+                    bookmarks.Remove(mark);
+                    break;
                 }
             }
+            RefreshBookmarksTab();
         }
 
         private void richTextBox1_Enter(object sender, EventArgs e)
         {
-            richTextBox1.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+            try
+            {
+                richTextBox1.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                if (richTextBox1.Text == "about:blank")
+                    richTextBox1.Text = "История";
+            }
+            catch
+            {
+                richTextBox1.Text = "Закладки";
+            }
         }
 
         private void richTextBox1_Leave(object sender, EventArgs e)
@@ -297,8 +343,7 @@ namespace Browser
 
         private void bookmarksButton_Click(object sender, EventArgs e)
         {
-            CreateHtmlBookmarks();
-            AddHtmlTab("lastBookmarks.html");
+            AddBookmarksTab();
         }
 
         private void historyButton_Click(object sender, EventArgs e)
@@ -306,9 +351,133 @@ namespace Browser
             CreateHtmlHistory();
             AddHtmlTab("lastHistory.html");
         }
-    }
 
-    class bookmark
+        private void clearHistoryButton_Click(object sender, EventArgs e)
+        {
+            DialogResult mes = MessageBox.Show("Очистить историю?", "История просмотров будет удалена", MessageBoxButtons.OKCancel);
+            if (mes == DialogResult.OK)
+            {
+                histories.Clear();
+            }
+        }
+
+        void AddBookmarksTab()
+        {
+            tabControl1.TabPages.Add("Закладки");
+            tabControl1.SelectTab(i);
+            CreateBookmarksTab();
+            i += 1;
+        }
+        void CreateBookmarksTab()
+        {
+            TableLayoutPanel mainPanel = new TableLayoutPanel();
+            mainPanel.Dock = DockStyle.Fill;
+            mainPanel.ColumnCount = 0;
+            mainPanel.RowCount = 0;
+            int column;
+            int row;
+            if (bookmarks.Count <= 4)
+            {
+                column = bookmarks.Count;
+                row = 1;
+            }
+            else if (bookmarks.Count<=8)
+            {
+                column = 4;
+                row = 2;
+            }
+            else if (bookmarks.Count <= 16)
+            {
+                column = 4;
+                row = 4;
+            }
+            else
+            {
+                column = 8;
+                row = bookmarks.Count / 8;
+                if (bookmarks.Count % 8 != 0)
+                    row++;
+            }
+            int number = 0;
+            foreach (bookmark mark in bookmarks)
+            {
+                bookmarkButton newButton = new bookmarkButton(mark);
+                newButton.openUrlButton.Click += OpenBookmark;
+                newButton.deleteButton.Click += DeleteBookmark;
+                if (mainPanel.ColumnCount < column)
+                {
+                    mainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent));
+                }
+
+                else if (mainPanel.RowCount < row)
+                    mainPanel.RowStyles.Add(new RowStyle(SizeType.Percent));
+                mainPanel.Controls.Add(newButton, number % column, number / column);
+                number++;
+            }
+            foreach (ColumnStyle style in mainPanel.ColumnStyles)
+            {
+                style.Width = 100;
+            }
+            foreach (RowStyle style in mainPanel.RowStyles)
+            {
+                style.Height = 100;
+            }
+            mainPanel.Visible = true;
+            tabControl1.SelectedTab.Controls.Add(mainPanel);
+        }
+        void RefreshBookmarksTab()
+        {
+            tabControl1.SelectedTab.Controls.RemoveAt(0);
+            CreateBookmarksTab();
+
+        }
+        private void printButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tabControl1.SelectedTab.Text != "История")
+                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).ShowSaveAsDialog();
+            }
+            catch
+            {
+
+            }
+        }
+    }
+    class bookmarkButton : TableLayoutPanel
+    {
+        public urlButton openUrlButton;
+        public urlButton deleteButton;
+        bookmark mark;
+        public bookmarkButton(bookmark mark) : base()
+        {
+            this.mark = mark;
+            this.Dock = DockStyle.Fill;
+            this.BackColor = Color.AliceBlue;
+            openUrlButton = new urlButton(mark.url);
+            openUrlButton.Visible = true;
+            openUrlButton.Text = mark.name;
+            openUrlButton.BackColor = Color.Aqua;
+            openUrlButton.Dock = DockStyle.Fill;
+            deleteButton = new urlButton(mark.url);
+            deleteButton.Visible = true;
+            deleteButton.Text = "X";
+            deleteButton.BackColor = Color.Red;
+            deleteButton.Dock = DockStyle.Fill;
+            this.Controls.Add(deleteButton);
+            this.Controls.Add(openUrlButton);
+        }
+    }
+    class urlButton : Button
+    {
+        public string url;
+        public urlButton(string Url) : base()
+        {
+            url = Url;
+        }
+
+    }
+    public class bookmark
     {
         public string name;
         public string url;

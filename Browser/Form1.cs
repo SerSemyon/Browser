@@ -195,7 +195,15 @@ namespace Browser
         {
             isPageCompleted = true;
             refreshButton.BackgroundImage = Properties.Resources.refresh; 
-            tabControl1.SelectedTab.Text = ((WebBrowser)sender).DocumentTitle;
+            string namePage = ((WebBrowser)sender).DocumentTitle;
+            if (namePage != "Не удается открыть эту страницу")
+            {
+                tabControl1.SelectedTab.Text = namePage;
+            }
+            else
+            {
+                OpenUrl("?" + ((WebBrowser)sender).Url.ToString().Split('/')[2]);
+            }
             SaveInHistory();
         }
         private void refreshButton_Click(object sender, EventArgs e)
@@ -470,12 +478,25 @@ namespace Browser
             try
             {
                 if (tabControl1.SelectedTab.Text != "История")
-                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).ShowSaveAsDialog();
+                {
+
+                }
+                //((WebBrowser)tabControl1.SelectedTab.Controls[0]).ShowSaveAsDialog();
             }
             catch
             {
 
             }
+        }
+
+        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            e.Graphics.DrawString(((WebBrowser)tabControl1.SelectedTab.Controls[0]).Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Font, Brushes.Black, 0, 0);
         }
     }
     class bookmarkButton : TableLayoutPanel

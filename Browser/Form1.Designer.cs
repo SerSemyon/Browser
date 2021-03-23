@@ -33,6 +33,7 @@ namespace Browser
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.saveButton = new System.Windows.Forms.Button();
             this.printButton = new System.Windows.Forms.Button();
             this.clearHistoryButton = new System.Windows.Forms.Button();
             this.historyButton = new System.Windows.Forms.Button();
@@ -45,6 +46,7 @@ namespace Browser
             this.refreshButton = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.printDialog1 = new System.Windows.Forms.PrintDialog();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -75,7 +77,7 @@ namespace Browser
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.ColumnCount = 11;
+            this.tableLayoutPanel2.ColumnCount = 12;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
@@ -87,6 +89,8 @@ namespace Browser
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel2.Controls.Add(this.saveButton, 11, 0);
             this.tableLayoutPanel2.Controls.Add(this.printButton, 10, 0);
             this.tableLayoutPanel2.Controls.Add(this.clearHistoryButton, 9, 0);
             this.tableLayoutPanel2.Controls.Add(this.historyButton, 8, 0);
@@ -105,13 +109,23 @@ namespace Browser
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(794, 34);
             this.tableLayoutPanel2.TabIndex = 1;
-            this.tableLayoutPanel2.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel2_Paint);
+            // 
+            // saveButton
+            // 
+            this.saveButton.BackgroundImage = global::Browser.Properties.Resources.save;
+            this.saveButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.saveButton.Location = new System.Drawing.Point(757, 3);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(34, 28);
+            this.saveButton.TabIndex = 11;
+            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // printButton
             // 
             this.printButton.BackgroundImage = global::Browser.Properties.Resources.print;
             this.printButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.printButton.Location = new System.Drawing.Point(757, 3);
+            this.printButton.Location = new System.Drawing.Point(717, 3);
             this.printButton.Name = "printButton";
             this.printButton.Size = new System.Drawing.Size(34, 28);
             this.printButton.TabIndex = 10;
@@ -122,7 +136,7 @@ namespace Browser
             // 
             this.clearHistoryButton.BackgroundImage = global::Browser.Properties.Resources.clear;
             this.clearHistoryButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.clearHistoryButton.Location = new System.Drawing.Point(717, 3);
+            this.clearHistoryButton.Location = new System.Drawing.Point(677, 3);
             this.clearHistoryButton.Name = "clearHistoryButton";
             this.clearHistoryButton.Size = new System.Drawing.Size(34, 28);
             this.clearHistoryButton.TabIndex = 9;
@@ -133,7 +147,7 @@ namespace Browser
             // 
             this.historyButton.BackgroundImage = global::Browser.Properties.Resources.history;
             this.historyButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.historyButton.Location = new System.Drawing.Point(677, 3);
+            this.historyButton.Location = new System.Drawing.Point(637, 3);
             this.historyButton.Name = "historyButton";
             this.historyButton.Size = new System.Drawing.Size(34, 28);
             this.historyButton.TabIndex = 8;
@@ -144,7 +158,7 @@ namespace Browser
             // 
             this.bookmarksButton.BackgroundImage = global::Browser.Properties.Resources.bookmark;
             this.bookmarksButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.bookmarksButton.Location = new System.Drawing.Point(637, 3);
+            this.bookmarksButton.Location = new System.Drawing.Point(597, 3);
             this.bookmarksButton.Name = "bookmarksButton";
             this.bookmarksButton.Size = new System.Drawing.Size(34, 28);
             this.bookmarksButton.TabIndex = 7;
@@ -155,7 +169,7 @@ namespace Browser
             // 
             this.addBookmarkButton.BackgroundImage = global::Browser.Properties.Resources.addBookmark;
             this.addBookmarkButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.addBookmarkButton.Location = new System.Drawing.Point(597, 3);
+            this.addBookmarkButton.Location = new System.Drawing.Point(557, 3);
             this.addBookmarkButton.Name = "addBookmarkButton";
             this.addBookmarkButton.Size = new System.Drawing.Size(34, 28);
             this.addBookmarkButton.TabIndex = 6;
@@ -166,7 +180,7 @@ namespace Browser
             // 
             this.deleteButton.BackgroundImage = global::Browser.Properties.Resources.delete;
             this.deleteButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.deleteButton.Location = new System.Drawing.Point(557, 3);
+            this.deleteButton.Location = new System.Drawing.Point(517, 3);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(34, 28);
             this.deleteButton.TabIndex = 5;
@@ -177,7 +191,7 @@ namespace Browser
             // 
             this.addButton.BackgroundImage = global::Browser.Properties.Resources.add;
             this.addButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.addButton.Location = new System.Drawing.Point(517, 3);
+            this.addButton.Location = new System.Drawing.Point(477, 3);
             this.addButton.Name = "addButton";
             this.addButton.Size = new System.Drawing.Size(34, 28);
             this.addButton.TabIndex = 4;
@@ -225,7 +239,7 @@ namespace Browser
             this.richTextBox1.Multiline = false;
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.richTextBox1.Size = new System.Drawing.Size(388, 28);
+            this.richTextBox1.Size = new System.Drawing.Size(348, 28);
             this.richTextBox1.TabIndex = 9;
             this.richTextBox1.Text = "";
             this.richTextBox1.WordWrap = false;
@@ -236,6 +250,10 @@ namespace Browser
             // printDocument1
             // 
             this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument1_PrintPage);
+            // 
+            // printDialog1
+            // 
+            this.printDialog1.UseEXDialog = true;
             // 
             // browserForm
             // 
@@ -271,6 +289,8 @@ namespace Browser
         private System.Windows.Forms.Button clearHistoryButton;
         private System.Windows.Forms.Button printButton;
         private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.PrintDialog printDialog1;
+        private System.Windows.Forms.Button saveButton;
     }
 }
 

@@ -131,6 +131,7 @@
   <ItemGroup>
     <Content Include="global_payment_international_icon_182974.ico" />
     <None Include="Resources\tableBookmark.png" />
+    <None Include="Resources\save.png" />
     <Content Include="worldwide_internet_globe_icon_124096.ico" />
     <None Include="Resources\bookmarks.jpg" />
     <None Include="Resources\print.jpg" />

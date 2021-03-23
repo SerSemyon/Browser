@@ -475,28 +475,36 @@ namespace Browser
         }
         private void printButton_Click(object sender, EventArgs e)
         {
+            if (printDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Print();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Ошибка параметров печати.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            e.Graphics.DrawString(((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentText, richTextBox1.Font, Brushes.Black, 0, 0); //Класс Graphics предоставляет методы рисования на устройстве отображения
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
             try
             {
                 if (tabControl1.SelectedTab.Text != "История")
                 {
-
+                    ((WebBrowser)tabControl1.SelectedTab.Controls[0]).ShowSaveAsDialog();
                 }
-                //((WebBrowser)tabControl1.SelectedTab.Controls[0]).ShowSaveAsDialog();
             }
             catch
             {
 
             }
-        }
-
-        private void tableLayoutPanel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
-        {
-            e.Graphics.DrawString(((WebBrowser)tabControl1.SelectedTab.Controls[0]).Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Font, Brushes.Black, 0, 0);
         }
     }
     class bookmarkButton : TableLayoutPanel

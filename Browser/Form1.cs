@@ -68,13 +68,13 @@ namespace Browser
         private void HtmlDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             streamHtml.Close();
-            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;
+            //tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
             if (((WebBrowser)sender).Url.ToString()!= "about:blank")
             {
                 ((WebBrowser)sender).DocumentCompleted -= HtmlDocumentCompleted;
                 ((WebBrowser)sender).DocumentCompleted += DocumentCompleted;
-                SaveInHistory();
-                if (tabControl1.SelectedIndex == indexTabHistory)
+                //SaveInHistory();
+                if (((page)sender).indexPage == indexTabHistory)
                     indexTabHistory = -1;
             }
         }
@@ -128,12 +128,9 @@ namespace Browser
         }
         void AddHtmlTab(string nameFile)
         {
-            WebBrowser web = new WebBrowser();
-            web.Visible = true;
-            web.ScriptErrorsSuppressed = true;
-            web.Dock = DockStyle.Fill;
+            page web = new page(i);
             web.NewWindow += NewWindow;
-            tabControl1.TabPages.Add("New Pages");
+            tabControl1.TabPages.Add("История");
             tabControl1.SelectTab(i);
             tabControl1.SelectedTab.Controls.Add(web);
             i += 1;
@@ -143,46 +140,30 @@ namespace Browser
         }
         void AddTab(string url)
         {
-            WebBrowser web = new WebBrowser();
-            web.Visible = true; 
-            web.ScriptErrorsSuppressed = true; 
-            web.Dock = DockStyle.Fill;
+            page web = new page(i);
             web.DocumentCompleted += DocumentCompleted;
             web.NewWindow += NewWindow;
-            tabControl1.TabPages.Add("New Pages"); 
-            tabControl1.SelectTab(i); 
+            tabControl1.TabPages.Add("New Pages");
+            tabControl1.SelectTab(i);
             tabControl1.SelectedTab.Controls.Add(web);
             i += 1;
-            OpenUrl(url);
+            web.Navigate(url);
         }
         private void NewWindow(object sender, CancelEventArgs e)
         {
             HtmlElement link = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Document.ActiveElement;
             string url = link.GetAttribute("href");
-            ((WebBrowser)sender).Navigate(url);
+            ((page)sender).OpenUrl(url);
             e.Cancel = true;
         }
-        void OpenUrl(string url)
-        {
-            isPageCompleted = false;
-            refreshButton.BackgroundImage = Properties.Resources.stop;
-            try
-            {
-                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Navigate(url);
-            }
-            catch
-            {
-                AddTab(url);
-            }
-        }
-        void SaveInHistory()
+        void SaveInHistory(string newUrl)
         {
             try
             {
-                string thisUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                string thisUrl = newUrl;//((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
                 if (thisUrl != "about:blank")
                 {
-                    history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString());
+                    history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, newUrl);
                     try
                     {
                         if (nowOpen.url != lastOpenUrl)
@@ -208,14 +189,13 @@ namespace Browser
             string namePage = ((WebBrowser)sender).DocumentTitle;
             if (namePage != "Не удается открыть эту страницу")
             {
-                tabControl1.SelectedTab.Text = namePage;
+                tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
             }
             else
             {
-                OpenUrl("?" + ((WebBrowser)sender).Url.ToString().Split('/')[2]);
+                ((page)sender).OpenUrl("?" + ((WebBrowser)sender).Url.ToString().Split('/')[2]);
             }
-            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;//чтобы показывалось имя веб страницы
-            SaveInHistory();
+            SaveInHistory(((page)sender).Url.ToString());
         }
         private void refreshButton_Click(object sender, EventArgs e)
         {
@@ -231,7 +211,7 @@ namespace Browser
                     if (isPageCompleted)
                     {
                         string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
-                        OpenUrl(newUrl);
+                        ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(newUrl);
                     }
                     else
                     {
@@ -256,7 +236,7 @@ namespace Browser
         {
             try
             {
-                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoBack();
+                ((page)tabControl1.SelectedTab.Controls[0]).GoBack();
             }
             catch
             {
@@ -268,7 +248,7 @@ namespace Browser
         {
             try
             {
-                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).GoForward();
+                ((page)tabControl1.SelectedTab.Controls[0]).GoForward();
             }
             catch
             {
@@ -295,10 +275,10 @@ namespace Browser
                 {
                     indexTabHistory = -1;
                 }
-                int indexSelext = tabControl1.SelectedIndex;
-                if (indexTabHistory > indexSelext)
+                int indexSeleсt = tabControl1.SelectedIndex;
+                if (indexTabHistory > indexSeleсt)
                     indexTabHistory--;
-                if (indexTabBookmark > indexSelext)
+                if (indexTabBookmark > indexSeleсt)
                     indexTabBookmark--;
                 tabControl1.TabPages.RemoveAt(number);
                 try
@@ -317,7 +297,7 @@ namespace Browser
         {
             if (e.KeyCode == Keys.Enter)
             {
-                OpenUrl(richTextBox1.Text);
+                ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(richTextBox1.Text);
             }
         }
 
@@ -552,6 +532,11 @@ namespace Browser
 
             }
         }
+
+        private void richTextBox1_Click(object sender, EventArgs e)
+        {
+            richTextBox1.SelectAll();
+        }
     }
     class bookmarkButton : TableLayoutPanel
     {
@@ -608,6 +593,21 @@ namespace Browser
             time = newTime;
             name = newName;
             url = newUrl;
+        }
+    }
+    class page : WebBrowser
+    {
+        public int indexPage;
+        public page(int index) : base()
+        {
+            indexPage = index;
+            this.Visible = true;
+            this.ScriptErrorsSuppressed = true;
+            this.Dock = DockStyle.Fill;
+        }
+        public void OpenUrl(string url)
+        {
+            this.Navigate(url);
         }
     }
 }

@@ -243,6 +243,7 @@ namespace Browser
             this.richTextBox1.TabIndex = 9;
             this.richTextBox1.Text = "";
             this.richTextBox1.WordWrap = false;
+            this.richTextBox1.Click += new System.EventHandler(this.richTextBox1_Click);
             this.richTextBox1.Enter += new System.EventHandler(this.richTextBox1_Enter);
             this.richTextBox1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.richTextBox1_KeyUp);
             this.richTextBox1.Leave += new System.EventHandler(this.richTextBox1_Leave);
@@ -289,8 +290,8 @@ namespace Browser
         private System.Windows.Forms.Button clearHistoryButton;
         private System.Windows.Forms.Button printButton;
         private System.Drawing.Printing.PrintDocument printDocument1;
-        private System.Windows.Forms.PrintDialog printDialog1;
         private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.PrintDialog printDialog1;
     }
 }
 

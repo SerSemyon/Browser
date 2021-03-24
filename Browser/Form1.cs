@@ -19,6 +19,8 @@ namespace Browser
         List<history> histories;
         FileStream streamHtml;
         string lastOpenUrl;
+        int indexTabBookmark = -1;
+        int indexTabHistory = -1;
         void ReadBookmarks()
         {
             StreamReader reader = new StreamReader("Bookmarks.txt");
@@ -72,31 +74,40 @@ namespace Browser
                 ((WebBrowser)sender).DocumentCompleted -= HtmlDocumentCompleted;
                 ((WebBrowser)sender).DocumentCompleted += DocumentCompleted;
                 SaveInHistory();
+                if (tabControl1.SelectedIndex == indexTabHistory)
+                    indexTabHistory = -1;
             }
         }
         void CreateHtmlHistory()
         {
-            StreamWriter streamwriter = new StreamWriter("lastHistory.html");
-            streamwriter.WriteLine("<html>");
-            streamwriter.WriteLine("<head>");
-            streamwriter.WriteLine("  <title>История</title>");
-            streamwriter.WriteLine("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
-            streamwriter.WriteLine("</head>");
-            streamwriter.WriteLine("<body>");
-            if (histories.Count == 0)
+            try
             {
-                streamwriter.WriteLine("<p><img src =\"https://cdn.iconscout.com/icon/premium/png-512-thumb/janitor-1631013-1380608.png\" alt=\"Clear\"></p>");
-                streamwriter.WriteLine("<p><a> Тут чисто </a></p>");
+                StreamWriter streamwriter = new StreamWriter("lastHistory.html");
+                streamwriter.WriteLine("<html>");
+                streamwriter.WriteLine("<head>");
+                streamwriter.WriteLine("  <title>История</title>");
+                streamwriter.WriteLine("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
+                streamwriter.WriteLine("</head>");
+                streamwriter.WriteLine("<body>");
+                if (histories.Count == 0)
+                {
+                    streamwriter.WriteLine("<p><img src =\"https://cdn.iconscout.com/icon/premium/png-512-thumb/janitor-1631013-1380608.png\" alt=\"Clear\"></p>");
+                    streamwriter.WriteLine("<p><a> Тут чисто </a></p>");
+                }
+                else
+                    streamwriter.WriteLine("<p><img src =\"http://cdn.onlinewebfonts.com/svg/download_359214.png\" height =50 width = 50 align=\"middle\"></p>");
+                foreach (history story in histories)
+                {
+                    streamwriter.WriteLine("<p><a>" + story.time.ToString() + "</a> <a href=" + story.url + ">" + story.name + " " + story.url + "</a></p>");
+                }
+                streamwriter.WriteLine("</body>");
+                streamwriter.WriteLine("</html>");
+                streamwriter.Close();
             }
-            else
-                streamwriter.WriteLine("<p><img src =\"http://cdn.onlinewebfonts.com/svg/download_359214.png\" height =50 width = 50 align=\"middle\"></p>");
-            foreach (history story in histories)
+            catch
             {
-                streamwriter.WriteLine("<p><a>" + story.time.ToString()+"</a> <a href=" + story.url + ">" + story.name + " "+ story.url+"</a></p>");
+
             }
-            streamwriter.WriteLine("</body>");
-            streamwriter.WriteLine("</html>");
-            streamwriter.Close();
         }
         public browserForm()
         {
@@ -118,13 +129,13 @@ namespace Browser
         void AddHtmlTab(string nameFile)
         {
             WebBrowser web = new WebBrowser();
-            web.Visible = true; 
-            web.ScriptErrorsSuppressed = true; 
-            web.Dock = DockStyle.Fill; 
+            web.Visible = true;
+            web.ScriptErrorsSuppressed = true;
+            web.Dock = DockStyle.Fill;
             web.NewWindow += NewWindow;
-            tabControl1.TabPages.Add("New Pages"); 
-            tabControl1.SelectTab(i); 
-            tabControl1.SelectedTab.Controls.Add(web); 
+            tabControl1.TabPages.Add("New Pages");
+            tabControl1.SelectTab(i);
+            tabControl1.SelectedTab.Controls.Add(web);
             i += 1;
             web.DocumentCompleted += HtmlDocumentCompleted;
             streamHtml = new FileStream(nameFile, FileMode.Open);
@@ -194,7 +205,6 @@ namespace Browser
         private void DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             isPageCompleted = true;
-            refreshButton.BackgroundImage = Properties.Resources.refresh; 
             string namePage = ((WebBrowser)sender).DocumentTitle;
             if (namePage != "Не удается открыть эту страницу")
             {
@@ -204,9 +214,15 @@ namespace Browser
             {
                 OpenUrl("?" + ((WebBrowser)sender).Url.ToString().Split('/')[2]);
             }
+            tabControl1.SelectedTab.Text = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).DocumentTitle;//чтобы показывалось имя веб страницы
             SaveInHistory();
         }
         private void refreshButton_Click(object sender, EventArgs e)
+        {
+            RefreshPage();
+        }
+
+        void RefreshPage()
         {
             try
             {
@@ -236,7 +252,6 @@ namespace Browser
                 tabControl1.SelectedTab.Text = "Закладки";
             }
         }
-
         private void backButton_Click(object sender, EventArgs e)
         {
             try
@@ -272,6 +287,19 @@ namespace Browser
             if (tabControl1.TabPages.Count > 1)
             {
                 int number = tabControl1.SelectedIndex;
+                if (number == indexTabBookmark)
+                {
+                    indexTabBookmark = -1;
+                }
+                if (number == indexTabHistory)
+                {
+                    indexTabHistory = -1;
+                }
+                int indexSelext = tabControl1.SelectedIndex;
+                if (indexTabHistory > indexSelext)
+                    indexTabHistory--;
+                if (indexTabBookmark > indexSelext)
+                    indexTabBookmark--;
                 tabControl1.TabPages.RemoveAt(number);
                 try
                 {
@@ -380,8 +408,17 @@ namespace Browser
 
         private void historyButton_Click(object sender, EventArgs e)
         {
-            CreateHtmlHistory();
-            AddHtmlTab("lastHistory.html");
+            if (indexTabHistory == -1)
+            {
+                CreateHtmlHistory();
+                indexTabHistory = i;
+                AddHtmlTab("lastHistory.html");
+            }
+            else
+            {
+                tabControl1.SelectedIndex = indexTabHistory;
+                RefreshPage();
+            }
         }
 
         private void clearHistoryButton_Click(object sender, EventArgs e)
@@ -400,10 +437,19 @@ namespace Browser
 
         void AddBookmarksTab()
         {
-            tabControl1.TabPages.Add("Закладки");
-            tabControl1.SelectTab(i);
-            CreateBookmarksTab();
-            i += 1;
+            if (indexTabBookmark ==-1)
+            {
+                tabControl1.TabPages.Add("Закладки");
+                tabControl1.SelectTab(i);
+                CreateBookmarksTab();
+                indexTabBookmark = i;
+                i += 1;
+            }
+            else
+            {
+                tabControl1.SelectedIndex = indexTabBookmark;
+                RefreshPage();
+            }
         }
         void CreateBookmarksTab()
         {

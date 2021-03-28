@@ -69,6 +69,8 @@ namespace Browser
         {
             streamHtml.Close();
             tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
+            if (tabControl1.SelectedIndex == indexTabHistory) 
+                pageCompleted(true);
             if (((WebBrowser)sender).Url.ToString()!= "about:blank")
             {
                 ((WebBrowser)sender).DocumentCompleted -= HtmlDocumentCompleted;
@@ -130,8 +132,8 @@ namespace Browser
             page web = new page(i);
             web.NewWindow += NewWindow;
             tabControl1.TabPages.Add("История");
+            tabControl1.TabPages[i].Controls.Add(web);
             tabControl1.SelectTab(i);
-            tabControl1.SelectedTab.Controls.Add(web);
             i += 1;
             web.DocumentCompleted += HtmlDocumentCompleted;
             streamHtml = new FileStream(nameFile, FileMode.Open);
@@ -143,8 +145,8 @@ namespace Browser
             web.DocumentCompleted += DocumentCompleted;
             web.NewWindow += NewWindow;
             tabControl1.TabPages.Add("New Pages");
+            tabControl1.TabPages[i].Controls.Add(web);
             tabControl1.SelectTab(i);
-            tabControl1.SelectedTab.Controls.Add(web);
             i += 1;
             web.Navigate(url);
         }
@@ -188,6 +190,8 @@ namespace Browser
             string namePage = ((WebBrowser)sender).DocumentTitle;
             if (namePage != "Не удается открыть эту страницу")
             {
+                if (tabControl1.SelectedIndex == ((page)sender).indexPage)
+                    pageCompleted(true);
                 tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
             }
             else
@@ -198,7 +202,16 @@ namespace Browser
         }
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            RefreshPage();
+            if (isPageCompleted)
+            {
+                pageCompleted(false);
+                RefreshPage();
+            }
+            else
+            {
+                pageCompleted(true);
+                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
+            }
         }
 
         void RefreshPage()
@@ -207,17 +220,8 @@ namespace Browser
             {
                 if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
                 {
-                    if (isPageCompleted)
-                    {
-                        string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
-                        ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(newUrl);
-                    }
-                    else
-                    {
-                        ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
-                        isPageCompleted = true;
-                        refreshButton.BackgroundImage = Properties.Resources.refresh;
-                    }
+                    string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                    ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(newUrl);
                 }
                 else
                 {
@@ -257,8 +261,7 @@ namespace Browser
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            if (isPageCompleted)
-                AddTab();
+            AddTab();
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -557,6 +560,38 @@ namespace Browser
         private void richTextBox1_Click(object sender, EventArgs e)
         {
             richTextBox1.SelectAll();
+        }
+        private void pageCompleted(bool completed)
+        {
+            if (completed)
+            {
+                refreshButton.BackgroundImage = Properties.Resources.refresh;
+                isPageCompleted = true;
+            }
+            else
+            {
+                refreshButton.BackgroundImage = Properties.Resources.stop;
+                isPageCompleted = false;
+            }
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (((page)tabControl1.SelectedTab.Controls[0]).isPageCompleted)
+                {
+                    pageCompleted(true);
+                }
+                else
+                {
+                    pageCompleted(false);
+                }
+            }
+            catch
+            {
+
+            }
         }
     }
 }

@@ -11,9 +11,7 @@ namespace Browser
     class page : WebBrowser
     {
         public int indexPage;
-        Stack<string> pastUrl;
-        Stack<string> futureUrl;
-        string realUrl;
+        public bool isPageCompleted = false;
         public page(int index) : base()
         {
             indexPage = index;
@@ -21,43 +19,15 @@ namespace Browser
             this.ScriptErrorsSuppressed = true;
             this.Dock = DockStyle.Fill;
             this.DocumentCompleted += ThisDocumentCompleted;
-            pastUrl = new Stack<string>(4);
-            futureUrl = new Stack<string>(1);
         }
         private void ThisDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if (DocumentTitle != "Не удается открыть эту страницу")
-            {
-                realUrl = Url.ToString();
-            }
+            isPageCompleted = true;
         }
         public void OpenUrl(string url)
         {
-            if (realUrl != "")
-            {
-                pastUrl.Push(realUrl);
-                realUrl = "";
-                futureUrl.Clear();
-            }
+            isPageCompleted = false;
             this.Navigate(url);
-        }
-
-        public new void GoBack()
-        {
-            if (realUrl != "") //если страница загружена
-            {
-                futureUrl.Push(realUrl);
-                realUrl = "";
-                this.Navigate(pastUrl.Pop());
-            }
-            else
-            {
-                Navigate(pastUrl.Pop());
-            }
-        }
-        public new void GoForward()
-        {
-
         }
     }
 }

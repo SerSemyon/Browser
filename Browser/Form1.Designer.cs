@@ -74,6 +74,7 @@ namespace Browser
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(794, 404);
             this.tabControl1.TabIndex = 0;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tableLayoutPanel2
             // 
@@ -222,7 +223,7 @@ namespace Browser
             // 
             // refreshButton
             // 
-            this.refreshButton.BackgroundImage = global::Browser.Properties.Resources.refresh;
+            this.refreshButton.BackgroundImage = global::Browser.Properties.Resources.stop;
             this.refreshButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.refreshButton.Location = new System.Drawing.Point(83, 3);
             this.refreshButton.Name = "refreshButton";

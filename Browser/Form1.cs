@@ -68,12 +68,11 @@ namespace Browser
         private void HtmlDocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             streamHtml.Close();
-            //tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
+            tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
             if (((WebBrowser)sender).Url.ToString()!= "about:blank")
             {
                 ((WebBrowser)sender).DocumentCompleted -= HtmlDocumentCompleted;
                 ((WebBrowser)sender).DocumentCompleted += DocumentCompleted;
-                //SaveInHistory();
                 if (((page)sender).indexPage == indexTabHistory)
                     indexTabHistory = -1;
             }
@@ -275,11 +274,16 @@ namespace Browser
                 {
                     indexTabHistory = -1;
                 }
+                for (int p = tabControl1.SelectedIndex; p<tabControl1.TabPages.Count - 1; p++)
+                {
+                    ((page)tabControl1.SelectedTab.Controls[0]).indexPage--;
+                }
                 int indexSeleсt = tabControl1.SelectedIndex;
                 if (indexTabHistory > indexSeleсt)
                     indexTabHistory--;
                 if (indexTabBookmark > indexSeleсt)
                     indexTabBookmark--;
+                tabControl1.SelectedTab.Controls[0].Dispose();
                 tabControl1.TabPages.RemoveAt(number);
                 try
                 {
@@ -297,10 +301,27 @@ namespace Browser
         {
             if (e.KeyCode == Keys.Enter)
             {
-                ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(richTextBox1.Text);
+                try
+                {
+                    ((page)tabControl1.SelectedTab.Controls[0]).Navigate(richTextBox1.Text);
+                }
+                catch
+                {
+                    OpenFromBookmark(richTextBox1.Text);
+                }
             }
         }
 
+        void OpenFromBookmark(string url)
+        {
+            indexTabBookmark = -1;
+            tabControl1.SelectedTab.Controls.Clear();
+            page web = new page(tabControl1.SelectedIndex);
+            web.DocumentCompleted += DocumentCompleted;
+            web.NewWindow += NewWindow;
+            tabControl1.SelectedTab.Controls.Add(web);
+            web.Navigate(url);
+        }
         private void browserForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveBookmarks();
@@ -347,7 +368,7 @@ namespace Browser
         }
         private void OpenBookmark(object sender, EventArgs e)
         {
-            AddTab(((urlButton)sender).url);
+            OpenFromBookmark(((urlButton)sender).url);
         }
         public void DeleteBookmark(object sender, EventArgs e)
         {
@@ -536,78 +557,6 @@ namespace Browser
         private void richTextBox1_Click(object sender, EventArgs e)
         {
             richTextBox1.SelectAll();
-        }
-    }
-    class bookmarkButton : TableLayoutPanel
-    {
-        public urlButton openUrlButton;
-        public urlButton deleteButton;
-        bookmark mark;
-        public bookmarkButton(bookmark mark) : base()
-        {
-            this.mark = mark;
-            this.Dock = DockStyle.Fill;
-            this.BackColor = Color.AliceBlue;
-            openUrlButton = new urlButton(mark.url);
-            openUrlButton.Visible = true;
-            openUrlButton.Text = mark.name;
-            openUrlButton.BackColor = Color.White;
-            openUrlButton.Dock = DockStyle.Fill;
-            openUrlButton.BackgroundImageLayout = ImageLayout.Zoom;
-            openUrlButton.BackgroundImage = Properties.Resources.tableBookmark;
-            deleteButton = new urlButton(mark.url);
-            deleteButton.Visible = true;
-            deleteButton.Text = "X";
-            deleteButton.BackColor = Color.Red;
-            deleteButton.Dock = DockStyle.Fill;
-            this.Controls.Add(deleteButton);
-            this.Controls.Add(openUrlButton);
-        }
-    }
-    class urlButton : Button
-    {
-        public string url;
-        public urlButton(string Url) : base()
-        {
-            url = Url;
-        }
-
-    }
-    public class bookmark
-    {
-        public string name;
-        public string url;
-        public bookmark(string newName, string newUrl)
-        {
-            name = newName;
-            url = newUrl;
-        }
-    }
-    class history
-    {
-        public DateTime time;
-        public string name;
-        public string url;
-        public history(DateTime newTime, string newName, string newUrl)
-        {
-            time = newTime;
-            name = newName;
-            url = newUrl;
-        }
-    }
-    class page : WebBrowser
-    {
-        public int indexPage;
-        public page(int index) : base()
-        {
-            indexPage = index;
-            this.Visible = true;
-            this.ScriptErrorsSuppressed = true;
-            this.Dock = DockStyle.Fill;
-        }
-        public void OpenUrl(string url)
-        {
-            this.Navigate(url);
         }
     }
 }

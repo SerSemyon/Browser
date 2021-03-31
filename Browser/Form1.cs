@@ -152,19 +152,18 @@ namespace Browser
         }
         private void NewWindow(object sender, CancelEventArgs e)
         {
-            HtmlElement link = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Document.ActiveElement;
+            HtmlElement link = ((WebBrowser)sender).Document.ActiveElement;
             string url = link.GetAttribute("href");
             ((page)sender).OpenUrl(url);
             e.Cancel = true;
         }
-        void SaveInHistory(string newUrl)
+        void SaveInHistory(string thisUrl, int namePage)
         {
             try
             {
-                string thisUrl = newUrl;//((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
                 if (thisUrl != "about:blank")
                 {
-                    history nowOpen = new history(DateTime.Now, tabControl1.SelectedTab.Text, newUrl);
+                    history nowOpen = new history(DateTime.Now, Convert.ToString(namePage), thisUrl);
                     try
                     {
                         if (nowOpen.url != lastOpenUrl)
@@ -193,12 +192,12 @@ namespace Browser
                 if (tabControl1.SelectedIndex == ((page)sender).indexPage)
                     pageCompleted(true);
                 tabControl1.TabPages[((page)sender).indexPage].Text = ((page)sender).DocumentTitle;
+                SaveInHistory(((page)sender).Url.ToString(),((page)sender).indexPage);
             }
             else
             {
                 ((page)sender).OpenUrl("?" + ((WebBrowser)sender).Url.ToString().Split('/')[2]);
             }
-            SaveInHistory(((page)sender).Url.ToString());
         }
         private void refreshButton_Click(object sender, EventArgs e)
         {
@@ -209,8 +208,15 @@ namespace Browser
             }
             else
             {
-                pageCompleted(true);
-                ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
+                try
+                {
+                    pageCompleted(true);
+                    ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Stop();
+                }
+                catch
+                {
+
+                }
             }
         }
 
@@ -218,9 +224,10 @@ namespace Browser
         {
             try
             {
-                if (((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString() != "about:blank")
+                string url = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                if (url != "about:blank")
                 {
-                    string newUrl = ((WebBrowser)tabControl1.SelectedTab.Controls[0]).Url.ToString();
+                    string newUrl = url;
                     ((page)tabControl1.SelectedTab.Controls[0]).OpenUrl(newUrl);
                 }
                 else
@@ -233,6 +240,7 @@ namespace Browser
             {
                 RefreshBookmarksTab();
                 tabControl1.SelectedTab.Text = "Закладки";
+                pageCompleted(true);
             }
         }
         private void backButton_Click(object sender, EventArgs e)
@@ -427,7 +435,8 @@ namespace Browser
 
         private void clearHistoryButton_Click(object sender, EventArgs e)
         {
-            DialogResult mes = MessageBox.Show("Очистить историю?", "История просмотров будет удалена", MessageBoxButtons.OKCancel);
+            DialogResult mes = MessageBox.Show("Очистить историю?", 
+                "История просмотров будет удалена", MessageBoxButtons.OKCancel);
             if (mes == DialogResult.OK)
             {
                 histories.Clear(); 
@@ -579,7 +588,8 @@ namespace Browser
         {
             try
             {
-                if (((page)tabControl1.SelectedTab.Controls[0]).isPageCompleted)
+                bool compl = ((page)tabControl1.SelectedTab.Controls[0]).isPageCompleted;
+                if (compl)
                 {
                     pageCompleted(true);
                 }
@@ -592,6 +602,7 @@ namespace Browser
             {
 
             }
+                
         }
     }
 }
